@@ -1,5 +1,12 @@
-{ python3Packages, }:
-with python3Packages;
+{ buildPythonPackage
+, click
+, colorama
+, appdirs
+, requests
+, packaging
+, setuptools
+}:
+
 buildPythonPackage rec{
   name = "beard";
   version = "1.2.0";

@@ -1,4 +1,4 @@
-{ lib, python3Packages, plexFetchFromGitHub }:
+{ lib, python3Packages, plexFetchFromGitHub, fetchPypi }:
 {
   /*
   * Builds a `setup.py` base python package.
@@ -26,4 +26,12 @@
         doUnpack = false;
         dontUseSetuptoolsCheck = true;
       } // params);
+
+  overrideViaPypi = pkg: { version, sha256, pname ? pkg.pname }: pkg.overrideAttrs (old: {
+    inherit version;
+    src = fetchPypi {
+      inherit pname;
+      inherit version sha256;
+    };
+  });
 }
