@@ -66,7 +66,7 @@ let
       };
 
       plex-conan = pprev.callPackage ../derivations/conan.nix { };
-      grabdeps = pprev.callPackage ../derivations/grabdeps.nix { inherit overrideViaPypi; };
+      grabdeps = pprev.callPackage ../derivations/grabdeps.nix { };
       beard = pprev.callPackage ../derivations/beard.nix { };
       devstory = pprev.callPackage ../derivations/devstory.nix {
         inherit (pfinal) grabdeps beard;

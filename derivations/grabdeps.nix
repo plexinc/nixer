@@ -10,7 +10,6 @@
 , poyo
 , importlib-metadata
 , certifi
-, overrideViaPypi
 }:
 
 let
@@ -39,15 +38,13 @@ buildPythonApplication rec{
   VERSION = version;
   GRABDEPS_CONAN_COMMAND = "${plex-conan}/bin/conan";
 
-  # src = builtins.fetchGit
-  #   {
-  #     url = "ssh://git@github.com/plexinc/${name}.git";
-  #     shallow = true;
-  #     ref = "v9";
-  #     rev = "50353d26ccf2094e1903df4ee91cdc37a1383599";
-  #   };
-
-  src = /home/lxsameer/src/plex/grabdeps;
+  src = builtins.fetchGit
+    {
+      url = "ssh://git@github.com/plexinc/${name}.git";
+      shallow = true;
+      ref = "v9";
+      rev = "50353d26ccf2094e1903df4ee91cdc37a1383599";
+    };
 
   #setupHook = "${hook}";
 

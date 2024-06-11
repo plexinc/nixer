@@ -3,10 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-conan.url = "github:NixOS/nixpkgs/e912fb83d2155a393e7146da98cda0e455a80fb6"; #e912fb83d2155a393e7146da98cda0e455a80fb6   # 9a9dae8f6319600fa9aebde37f340975cab4b8c0
-    #pyz-builds.url = "git+ssh://git@github.com/plexinc/pyz-builds";
-    pyz-builds.url = "/home/lxsameer/src/plex/pyz-builds";
-    pyz-builds.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs-conan.url = "github:NixOS/nixpkgs/e912fb83d2155a393e7146da98cda0e455a80fb6";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
