@@ -1,0 +1,4 @@
+cblack==21.6b0
+wheel
+pylint==2.*
+build>=0.0.4

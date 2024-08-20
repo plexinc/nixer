@@ -1,0 +1,5 @@
+repos:
+- repo: https://github.com/pausan/cblack.git
+  rev: release-21.6b0
+  hooks:
+    - id: cblack

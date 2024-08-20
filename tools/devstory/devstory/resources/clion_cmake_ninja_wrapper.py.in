@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import subprocess
+import shutil
+import re
+import select
+import envwrap
+
+from pathlib import Path
+
+# ---------------------- Configuration section ------------------------------
+
+MAKE_PATH = "/usr/bin/make"
+TRACING = True
+
+# --------------------------- Code section ----------------------------------
+
+def trace(message, argv = []):
+    if not TRACING:
+        return
+
+    with open("/tmp/cmake_wrapper.log", "a") as log:
+        if not argv == []:
+            log.write("\n\n")
+
+        log.write(str(message))
+
+        if not argv == []:
+            argv = '"%s"' % ('" "'.join(argv))
+            log.write("\n\n\t%s\n\tat: %s\n" % (argv, os.getcwd()))
+
+def call_in_envwrap(cmd):
+    script_path = Path(os.path.dirname(os.path.realpath(__file__)))
+    return [sys.executable, str(script_path / "envwrap.py")]  + cmd
+
+
+def call_cmake(passing_args):
+    """Call real cmake as a subprocess passing it's output both to stdout and trace file."""
+    passing_args = ["cmake"] + passing_args
+    trace("Calling real cmake:", passing_args)
+
+    proc = subprocess.Popen(call_in_envwrap(passing_args), stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, bufsize=0)
+
+    while True:
+        reads = [proc.stdout.fileno(), proc.stderr.fileno()]
+        ret = select.select(reads, [], [])
+
+        for fd in ret[0]:
+            if fd == proc.stdout.fileno():
+                line = proc.stdout.readline()
+                sys.stdout.write(line.decode("utf-8"))
+                sys.stdout.flush()
+                trace(line)
+            if fd == proc.stderr.fileno():
+                line = proc.stderr.readline()
+                sys.stderr.write(line.decode("utf-8"))
+                sys.stderr.flush()
+                trace(line)
+
+        if proc.poll() != None:
+            break
+
+    for line in proc.stdout:
+        sys.stdout.write(line.decode("utf-8"))
+        trace(line)
+
+    for line in proc.stderr:
+        sys.stderr.write(line.decode("utf-8"))
+        trace(line)
+
+    return proc.poll()
+
+def is_real_project():
+    """Detect if called inside clion private directory."""
+    cwd = os.getcwd()
+    if "build" in cwd:
+      return True
+    return "CLion" in cwd and "cmake" in cwd
+
+class CMakeCache(object):
+    """CMake cache management utility"""
+    def __init__(self, path):
+        super(CMakeCache, self).__init__()
+        self.path = path
+
+    def alter(self, variable, value):
+        """
+        Change a variable value in CMake cache.
+        TODO: Add variable if it doesn't already exist
+        """
+        if not os.path.isfile(self.path):
+            return
+
+        with open(self.path, "r") as cache_file:
+            cache_data = cache_file.read()
+
+        pattern = "%s=.*" % re.escape(variable)
+        replacement = "%s=%s" % (variable, value)
+        cache_data = re.sub(pattern, replacement, cache_data)
+
+        with open(self.path, "w") as cache_file:
+            cache_file.write(cache_data)
+
+    def ninjafy(self):
+        self.alter("CMAKE_GENERATOR:INTERNAL", "Ninja")
+        self.alter("CMAKE_MAKE_PROGRAM:FILEPATH", envwrap.which("ninja"))
+
+    def makefy(self):
+        self.alter("CMAKE_GENERATOR:INTERNAL", "Unix Makefiles")
+        self.alter("CMAKE_MAKE_PROGRAM:FILEPATH", MAKE_PATH)
+
+
+def ninjafy_argv(original):
+    """Replace Unix Makefiles generator with Ninja"""
+    processed = []
+    next_g = False
+    for a in original:
+        if a == "-G":
+            next_g = True
+        elif next_g and "Unix Makefiles" in a:
+            a = a.replace("Unix Makefiles", "Ninja")
+
+        processed.append(a)
+
+    return processed
+
+
+def removeEmptyBuildArg(original):
+  resulting = []
+  for a in original:
+    if a == "-DCMAKE_BUILD_TYPE=":
+      continue
+
+    resulting.append(a)
+
+  return resulting
+
+def modifyCacheArgs(original):
+    args_to_remove = ("-DCMAKE_CXX_COMPILER", "-DCMAKE_C_COMPILER")
+    resulting = [arg for arg in original if not arg.startswith(args_to_remove)]
+    resulting = ["-C", str(Path("initial-cache.cmake").resolve())] + resulting
+    return resulting
+
+trace("Originally called:", sys.argv)
+
+# Enable wrapping logic only when called inside clion private directory.
+if not is_real_project():
+    trace("Skipping because not real_project")
+    sys.exit(call_cmake(sys.argv[1:]))
+
+# Stop the idiotic runs of cmake that I never ever ever ever use!
+if "-DCMAKE_BUILD_TYPE=MinSizeRel"  in sys.argv or "-DCMAKE_BUILD_TYPE=Release" in sys.argv:
+    sys.exit(0)
+
+# Check if generator argument was specified
+if "-G" in sys.argv:
+    # Fix broken CLion
+    args = removeEmptyBuildArg(sys.argv[1:])
+
+    # add cache and remove compilers if cache is available
+    if os.path.exists("initial-cache.cmake"):
+        args = modifyCacheArgs(args)
+
+    # Generate Makefile artifacts required by CLion
+    cache = CMakeCache("CMakeCache.txt")
+    cache.makefy()
+    exit_code = call_cmake(args)
+    if exit_code != 0:
+        sys.exit(exit_code)
+
+    # Generate Ninja artifacts for actual build
+    passing_args = ninjafy_argv(args)
+    cache.ninjafy()
+    sys.exit(call_cmake(passing_args))
+else:
+    sys.exit(call_cmake(sys.argv[1:]))

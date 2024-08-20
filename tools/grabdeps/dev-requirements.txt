@@ -1,0 +1,6 @@
+cblack==21.6b0
+wheel
+pylint==2.*
+pytype==2023.*
+poyo==0.5.0
+build>=0.0.4

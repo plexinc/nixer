@@ -1,0 +1,3 @@
+test https://artifactory.plex.bz/artifactory/api/conan/conan-test True
+llvm https://artifactory.plex.bz/artifactory/api/conan/conan-llvm-toolchain True
+main https://artifactory.plex.bz/artifactory/api/conan/conan-main True

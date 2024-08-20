@@ -1,0 +1,51 @@
+# plex-settings: 2
+
+# OS where the build runs
+build_os: [None, Linux, Windows, Macos, Ubuntu]
+
+# OS that the binaries will run on. "host" in autotools/meson
+os:
+    Windows:
+    Cygwin:
+    Linux:
+    Ubuntu:
+    Macos:
+        version: [None, "10.14", "10.15", "10.16", "11.0"]
+    Android:
+        android_ndk: [None, "r16b", "r20", "r21"]
+        android_api_level: [None, "16", "19", "21", "24"]
+    iOS:
+        version: [None, "12.2", "13.0", "13.1"]
+    tvOS:
+        version: ["12.2", "13.0", "13.1"]
+    FreeBSD:
+arch:
+  x86:
+  x86_64:
+  armv7hf:
+  armv7neon:
+  aarch64:
+  armv7sf:
+  universal:
+  riscv64:
+compiler:
+    gcc:
+        version: ["6.3", "10.2"]
+        libcxx: [libstdc++, libstdc++11]
+        threads: [None, posix, win32] #  Windows MinGW
+        exception: [None, dwarf2, sjlj, seh] # Windows MinGW
+    Visual Studio:
+        runtime: [MD, MT, MTd, MDd]
+        version: ["14", "15", "16", "17"]
+        minorversion: [None, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+        patchversion: [None, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+        ltcg: [None, True]
+    clang:
+        version: ["5.0", "6.0", "7.0", "8.0", "9.0", "10.0", "11.0", "11.1", "12.0", "13.0", "14.0", "15.0", "16.0", "17.0", "18.0"]
+        libcxx: [libstdc++, libstdc++11, libc++, msvc]
+        lto: [None, thin, full]
+    apple-clang:
+        version: ["7.0", "7.3", "8.0", "8.1", "8.2", "9.0", "10.0", "11.0"]
+        libcxx: [libstdc++, libc++]
+
+build_type: [None, Debug, Release]

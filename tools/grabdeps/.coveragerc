@@ -1,0 +1,8 @@
+[report]
+omit = 
+	build/*
+	tests/*
+	setup.py
+	*/__init__.py
+	*/.venv/*
+

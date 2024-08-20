@@ -1,0 +1,12 @@
+click==7.*
+colorama==0.*
+yaspin==0.*
+appdirs==1.*
+requests==2.*
+tqdm==4.*
+redbaron==0.8
+asciitree==0.*
+beard>=1.0.36
+grabdeps>=1.0.38
+packaging>=20.9
+importlib_metadata==4.*
