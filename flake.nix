@@ -13,26 +13,36 @@
       {
         inherit inputs;
       }
-      (
+      ({ lib, withSystem, flake-parts-lib, ... }:
+
         let
-          plexOverlay = import ./overlays {
-            inherit inputs;
-          };
+          inherit (flake-parts-lib) importApply;
 
           systems = [
             "aarch64-darwin"
             "x86_64-linux"
           ];
 
+          flakeModules = lib.fix (import ./modules {
+            inherit inputs importApply withSystem flake-parts-lib lib;
+          });
+
         in
 
         {
+          imports = [
+            ./overlays
+          ];
           inherit systems;
 
           flake = {
-            overlays.default = plexOverlay;
-            inherit systems;
+            inherit flakeModules;
           };
+
+          # flake = {
+          #   overlays.default = plexOverlay;
+          #   inherit systems;
+          # };
 
 
           perSystem = { config, self', inputs', pkgs, system, ... }:
