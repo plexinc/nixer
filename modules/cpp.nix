@@ -158,8 +158,5 @@ with builtins;
           buildInputs = buildDeps ++ testDeps;
         };
       };
-
-
-      packages.default = drv;
     };
 }
