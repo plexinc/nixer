@@ -61,7 +61,7 @@ in
     };
   };
 
-  cpp = localFlake.importAppry ./cpp.nix self';
+  cpp = localFlake.importApply ./cpp self';
 
   # treefmt = localFlake.importApply ./common/treefmt.nix self';
   # githooks = localFlake.importApply ./common/githooks.nix self';
