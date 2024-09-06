@@ -8,7 +8,12 @@ with builtins;
   mkLibcxxStdenv = llvmVersion:
     let
       llvm = "llvmPackages_${llvmVersion}";
-      muslClang = pkgs.pkgsMusl.llvmPackages_18.libcxxStdenv.cc;
+      # We can uselibcxxStdenv.cc instead;
+      muslClang = pkgs.pkgsMusl.llvmPackages_18.clangUseLLVM; # .overrideAttrs (old: {
+      #   extraBuildCommands = old.extraBuildCommands + ''
+      #     echo "-rtlib=compiler-rt -Wno-unused-command-line-argument" >> $out/nix-support/cc-cflags
+      #   '';
+      # });
       stdenv' = pkgs.${llvm}.libcxxStdenv;
     in
     if pkgs.stdenv.hostPlatform.isLinux

@@ -23,7 +23,6 @@ self:
           ];
 
           buildInputs = [
-            pkgs.musl
           ];
         };
       };
