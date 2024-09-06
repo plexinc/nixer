@@ -36,14 +36,8 @@
           inherit systems;
 
           flake = {
-            inherit flakeModules;
+            inherit flakeModules systems;
           };
-
-
-          perSystem = { config, self', inputs', pkgs, system, ... }:
-            {
-              checks = { };
-            };
         }
       );
 }

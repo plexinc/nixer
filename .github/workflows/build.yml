@@ -27,17 +27,13 @@ jobs:
     runs-on: buildjet-2vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - run: git clone https://${{ secrets.GH_TOKEN_REPO_ACCESS }}@github.com/plexinc/beard.git
       - uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GH_TOKEN_REPO_ACCESS }}
           #${{ secrets.GH_TOKEN }}
           extra_nix_config: "access-tokens = github.com=${{ secrets.GH_TOKEN_REPO_ACCESS }}"
-      # - uses: webfactory/ssh-agent@v0.9.0
-      #   with:
-      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      # - run: cat /etc/nix/nix.conf
-      - run: nix build -L '.#python38' --show-trace
-        env:
-          NIX_GITHUB_PRIVATE_USERNAME: ${{ github.actor }}
-          NIX_GITHUB_PRIVATE_PASSWORD: ${{ secrets.GH_TOKEN_REPO_ACCESS }}
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PLEX_NIX_SSH_PRIVATE_KEY }}
+
+      - run: nix flake check -L --show-trace
