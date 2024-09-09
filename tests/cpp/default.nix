@@ -18,9 +18,10 @@
           ninjaFlags = [ "-v" ];
 
           checkPhase = ''
-            ldd main
+            ${pkgs.pax-utils}/bin/lddtree main
             ldd main|grep musl && echo "Success: Linked against Musl" || (echo "Error: Executable isn't link against Musl" && exit 1)
-            ldd main|grep 'libcxx-${llvmVersion}' && echo "Success: Linked against libc++" || (echo "Error: Executable isn't link against libc++" && exit 1)
+            ldd main|grep 'libc++' && echo "Success: Linked against libc++" || (echo "Error: Executable isn't link against libc++" && exit 1)
+            ldd main|grep 'libgcc' && echo "Error: Linked against libgcc???" && exit 1 || echo "Success: No libgcc"
             ./main
           '';
         };
