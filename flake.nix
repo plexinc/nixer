@@ -1,26 +1,6 @@
 {
   description = "Nixer is a set of utilities to make it easier to use Nix at Plex";
 
-  # the nixConfig here only affects the flake itself, not the system configuration!
-  nixConfig = {
-    # override the default substituters aka binary caches
-    substituters = [
-      "https://cache.nixos.org"
-      # nix community's cache server
-      "https://nix-community.cachix.org"
-
-      # Our own binary cache
-      "s3://cache.plex.bz"
-
-    ];
-    trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-
-      # This is the public key
-      "cache.plex.bz:Vdh+jRJPqfHyL3Mq5fHqRVMOoI3Jg6eSXkafBgY2eRU="
-    ];
-  };
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-conan.url = "github:NixOS/nixpkgs/e912fb83d2155a393e7146da98cda0e455a80fb6";

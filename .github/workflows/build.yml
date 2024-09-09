@@ -31,8 +31,10 @@ jobs:
       - uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GH_TOKEN_REPO_ACCESS }}
-          #${{ secrets.GH_TOKEN }}
-          extra_nix_config: "access-tokens = github.com=${{ secrets.GH_TOKEN_REPO_ACCESS }}"
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GH_TOKEN_REPO_ACCESS }}
+            trusted-public-keys = cache.plex.bz:Vdh+jRJPqfHyL3Mq5fHqRVMOoI3Jg6eSXkafBgY2eRU=
+            substituters = s3://cache.plex.bz https://cache.nixos.org/
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PLEX_NIX_SSH_PRIVATE_KEY }}
