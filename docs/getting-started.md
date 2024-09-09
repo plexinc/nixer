@@ -1,9 +1,14 @@
 # Getting Started
-!!! warning Nix is not your typical package manager that you can pick it up and just use it and hope for the best. It's really
-  important to learn Nix the language first.
+!!! warning
 
-!!! note These instructions are meant for none NixOS users. If you're using NixOS, you already know what you're doing. Just
-  enable our private binary cache and you're all set.
+    Nix is not your typical package manager that you can pick it up and just
+    use it and hope for the best. It's really important to learn Nix the language first.
+
+!!! note
+
+    These instructions are meant for none NixOS users. If you're using NixOS,
+    you already know what you're doing. Just enable our private binary cache
+    and you're all set.
 
 ## Long version
 
@@ -88,7 +93,9 @@ trusted-users = root @wheel
 
 experimental-features = nix-command flakes
 ```
-!!! warning Nix will not use our binary cache if you don't setup the public key correctly.
+!!! warning
+
+    Nix will not use our binary cache if you don't setup the public key correctly.
 
 
 and then make sure to setup your `awscli` configuration with your correct `aws_access_key_id` and `aws_secret_access_key`.
@@ -101,9 +108,14 @@ role_session_name = nix_<YOUR_USERNAME>
 role_arn = arn:aws:iam::362267952554:role/nix-binary-cache-user
 source_profile = default
 ```
-!!! note If you don't have access to aws, ask the infra team.
+!!! note
 
-!!! note The above snippet, is for the default aws profile, if you need to change the profile to something else,
+    If you don't have access to aws, ask the infra team.
+
+!!! note
+
+    The above snippet, is for the default aws profile, if you need to change the profile to something else,
+
   make sure to user `profile=NAME_OF_THE_PROFILE` querystring whenever you provide a cache url for nix.
 
 ## Short version

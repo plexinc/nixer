@@ -15,6 +15,8 @@ self:
         '';
       };
 
+      packages.cppCache = { };
+
       devShells = {
         default = (pkgs.mkShell.override { inherit stdenv; }) {
           nativeBuildInputs = [

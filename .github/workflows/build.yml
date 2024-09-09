@@ -23,7 +23,8 @@ jobs:
           matrix="$(nix eval --json '.#systems')"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
-  nix-build:
+  nix-check:
+    name: "Nix flake check"
     runs-on: buildjet-2vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
