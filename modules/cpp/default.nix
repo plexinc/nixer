@@ -2,9 +2,10 @@ self:
 {
   imports = [ self.default ];
 
+
   perSystem = { lib, config, pkgs, self', inputs', system, ... }:
     let
-      utils = pkgs.callPackage ./lib;
+      utils = pkgs.callPackage ./lib.nix { };
       stdenv = utils.mkLibcxxStdenv config.llvmVersion;
     in
     {
@@ -14,18 +15,19 @@ self:
           What version of LLVM to use.
         '';
       };
+      config = {
+        packages.cppStdenv = stdenv;
 
-      packages.cppCache = { };
+        devShells = {
+          cpp = (pkgs.mkShell.override { inherit stdenv; }) {
+            nativeBuildInputs = [
+              pkgs.cmake
+              pkgs.ninja
+            ];
 
-      devShells = {
-        default = (pkgs.mkShell.override { inherit stdenv; }) {
-          nativeBuildInputs = [
-            pkgs.cmake
-            pkgs.ninja
-          ];
-
-          buildInputs = [
-          ];
+            buildInputs = [
+            ];
+          };
         };
       };
     };

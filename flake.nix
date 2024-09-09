@@ -17,6 +17,7 @@
 
         let
           inherit (flake-parts-lib) importApply;
+
           systems = [
             "aarch64-darwin"
             "x86_64-linux"
@@ -31,6 +32,7 @@
         {
           imports = [
             ./tests
+            flakeModules.cpp
           ];
 
           inherit systems;
@@ -38,6 +40,7 @@
           flake = {
             inherit flakeModules systems;
           };
-        }
-      );
+
+          perSystem = { ... }: { };
+        });
 }
