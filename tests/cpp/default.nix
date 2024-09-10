@@ -4,7 +4,7 @@
       llvmVersion = "18";
       cppLib = pkgs.callPackage ../../modules/cpp/lib.nix { inherit pkgs; };
       stdenv = cppLib.mkLibcxxStdenv { inherit llvmVersion; };
-      mkTest = pname: (import../mkTest.nix {
+      mkTest = pname: (import ../mkTest.nix {
         inherit pname stdenv;
       });
     in
