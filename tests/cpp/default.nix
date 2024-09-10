@@ -3,8 +3,10 @@
     let
       llvmVersion = "18";
       cppLib = pkgs.callPackage ../../modules/cpp/lib.nix { inherit pkgs; };
-      stdenv = cppLib.mkLibcxxStdenv llvmVersion;
-      mkTest = pname: (import ../mkTest.nix { inherit pname stdenv; });
+      stdenv = cppLib.mkLibcxxStdenv { inherit llvmVersion; };
+      mkTest = pname: (import../mkTest.nix {
+        inherit pname stdenv;
+      });
     in
     {
       checks = {
