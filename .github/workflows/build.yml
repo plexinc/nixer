@@ -66,4 +66,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PLEX_NIX_SSH_PRIVATE_KEY }}
 
+      - run: nix flake show --show-trace
       - run: nix flake check -L --show-trace
+      - run: nix build ".#devShells.x86_64-linux.cpp" --show-trace
+      - run: echo "'${{ secrets.NIX_CACHE_SIGNING_KEY }}'" > cache.key
+      - run: nix copy --all --to 's3://cache.plex.bz?compression=zstd&compression-level=15&secret-key=cache.key'
+      - run: rm cache.key

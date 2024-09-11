@@ -41,7 +41,6 @@
             inherit flakeModules systems;
           };
 
-          perSystem = { ... }:
-            { };
+          perSystem = { pkgs, lib, ... }: { };
         });
 }
