@@ -51,6 +51,12 @@ jobs:
     runs-on: buildjet-32vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::362267952554:role/nix-binary-cache-writer-user
+          role-session-name: nixer-ci
+          aws-region: us-east-1
       - uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GH_TOKEN_REPO_ACCESS }}
