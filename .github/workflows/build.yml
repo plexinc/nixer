@@ -8,6 +8,10 @@ on:
       - gha
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   nix-matrix:
     runs-on: buildjet-2vcpu-ubuntu-2204
