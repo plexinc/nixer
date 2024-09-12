@@ -61,6 +61,7 @@ jobs:
           role-to-assume: arn:aws:iam::362267952554:role/github-action/nixer
           role-session-name: nixer-ci
           aws-region: us-east-1
+
       - uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GH_TOKEN_REPO_ACCESS }}
@@ -77,7 +78,7 @@ jobs:
           ssh-private-key: ${{ secrets.PLEX_NIX_SSH_PRIVATE_KEY }}
 
       - run: nix flake show --show-trace
-      - run: nix flake check -L --show-trace
+      - run: nix flake check -L --show-trace -v --debug
       - run: nix build ".#devShells.x86_64-linux.cpp" --show-trace
       - run: echo "'${{ secrets.NIX_CACHE_SIGNING_KEY }}'" > cache.key
       - run: nix copy --all --to 's3://cache.plex.bz?compression=zstd&compression-level=15&secret-key=cache.key'
