@@ -12,8 +12,9 @@ permissions:
   id-token: write
   contents: read
 
-  linux:
-    name: "Build and test on Linux"
+jobs:
+  Nix:
+    name: "Build and test"
     runs-on: ${{ matrix.host }}
     strategy:
       matrix:
