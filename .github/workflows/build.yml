@@ -40,7 +40,7 @@ jobs:
           output-credentials: true
 
       - uses: DeterminateSystems/nix-installer-action@main
-        if:  ${{ matrix.os == "Linux" }}
+        if:  ${{ matrix.os == 'Linux' }}
         with:
           init: none
           logger: pretty
@@ -53,7 +53,7 @@ jobs:
             access-tokens = github.com=${{ secrets.GH_TOKEN_REPO_ACCESS }}
 
       - uses: DeterminateSystems/nix-installer-action@main
-        if: ${{ matrix.os == "Darwin" }}
+        if: ${{ matrix.os == 'Darwin' }}
         with:
           logger: pretty
           kvm: true
