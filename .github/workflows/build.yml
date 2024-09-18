@@ -12,24 +12,19 @@ permissions:
   id-token: write
   contents: read
 
-jobs:
-  nix-matrix:
-    runs-on: buildjet-2vcpu-ubuntu-2204
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
-      - id: set-matrix
-        name: Generate Nix Matrix
-        run: |
-          set -Eeu
-          matrix="$(nix eval --json '.#systems')"
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-
   linux:
     name: "Build and test on Linux"
-    runs-on: buildjet-32vcpu-ubuntu-2204
+    runs-on: ${{ matrix.host }}
+    strategy:
+      matrix:
+        include:
+          - host: buildjet-32vcpu-ubuntu-2204
+            target: "x86_64-linux"
+          # - host: [self-hosted, X64, Windows]
+          #   target: "x86_64-linux"
+          - host: [self-hosted, ARM64, macOS]
+            target: "aarch64-darwin"
+
     steps:
       - uses: actions/checkout@v4
       - name: configure aws credentials
