@@ -21,10 +21,12 @@ jobs:
         include:
           - host: buildjet-32vcpu-ubuntu-2204
             target: "x86_64-linux"
+            os: Linux
           # - host: [self-hosted, X64, Windows]
           #   target: "x86_64-linux"
           - host: [self-hosted, ARM64, macOS]
             target: "aarch64-darwin"
+            os: Darwin
 
     steps:
       - uses: actions/checkout@v4
@@ -38,10 +40,22 @@ jobs:
           output-credentials: true
 
       - uses: DeterminateSystems/nix-installer-action@main
+        if:  ${{ matrix.os == Linux }}
         with:
           init: none
           logger: pretty
           planner:  linux
+          kvm: true
+          extra-conf: |
+            extra-substituters = s3://cache.plex.bz?region=us-east-1
+            trusted-public-keys = cache.plex.bz:Vdh+jRJPqfHyL3Mq5fHqRVMOoI3Jg6eSXkafBgY2eRU= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+            system-features = nixos-test benchmark big-parallel kvm
+            access-tokens = github.com=${{ secrets.GH_TOKEN_REPO_ACCESS }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+        if: ${{ matrix.os == Darwin }}
+        with:
+          logger: pretty
           kvm: true
           extra-conf: |
             extra-substituters = s3://cache.plex.bz?region=us-east-1
