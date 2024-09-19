@@ -13,5 +13,6 @@ rec {
   # Returns a `stdenv` set for the latest stable LLVM
   # On Linux it will use musl as libc and on all the
   # platforms it uses llvm infrastructure.
-  mkLibcxxStdenv = params: (targetPkgs params).stdenv;
+  mkLibcxxStdenv = { llvmVersion }@params:
+    (targetPkgs params).stdenv.overrideCC pkgs."clang_${llvmVersion}";
 }
