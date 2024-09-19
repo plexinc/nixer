@@ -1,5 +1,6 @@
 #! /bin/bash
 
+set -xe
 # This is a workaround the fact that we want to use nix in
 # single user mode and purely.
 pushd "$1"

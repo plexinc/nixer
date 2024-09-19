@@ -40,18 +40,6 @@ self:
             buildInputs = [
             ];
           };
-
-          fhs =
-            (pkgs.buildFHSEnv {
-              name = "CPP FHS environment";
-              targetPkgs = pkgs: (with targetPkgs; [
-                stdenv
-                musl
-
-                pkgs.cmake
-                pkgs.ninja
-              ]);
-            }).env;
         };
       };
     };
