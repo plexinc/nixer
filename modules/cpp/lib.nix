@@ -8,7 +8,7 @@ rec {
     # llvm as well
     if pkgs.stdenv.hostPlatform.isLinux
     then pkgs.pkgsMusl.pkgsLLVM
-    else pkgs.pkgsLLVM;
+    else pkgs;
 
   # Returns a `stdenv` set for the latest stable LLVM
   # On Linux it will use musl as libc and on all the
