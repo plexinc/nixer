@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include <features.h>
 
 using namespace std;
 
