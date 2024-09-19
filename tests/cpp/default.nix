@@ -1,5 +1,5 @@
 {
-  perSystem = { pkgs, system, ... }:
+  perSystem = { pkgs, system, lib, ... }:
     let
       llvmVersion = "18";
       cppLib = pkgs.callPackage ../../modules/cpp/lib.nix { inherit pkgs; };
@@ -7,11 +7,12 @@
       mkTest = pname: (import ../mkTest.nix {
         inherit pname stdenv;
       });
+      isLinux = pkgs.stdenv.hostPlatform.isLinux;
     in
     {
       checks = {
         cppPlain = mkTest "test-compiling-a-simple-program" {
-          src = if pkgs.stdenv.hostPlatform.isLinux then ./plain-musl else ./plain;
+          src = if isLinux then ./plain-musl else ./plain;
 
           nativeBuildInputs =
             (with pkgs; [ cmake ninja ]);
@@ -21,9 +22,12 @@
 
           checkPhase = ''
             ${pkgs.pax-utils}/bin/lddtree main
-            ldd main|grep musl && echo "Success: Linked against Musl" || (echo "Error: Executable isn't link against Musl" && exit 1)
             ldd main|grep 'libc++' && echo "Success: Linked against libc++" || (echo "Error: Executable isn't link against libc++" && exit 1)
             ldd main|grep 'libgcc' && echo "Error: Linked against libgcc???" && exit 1 || echo "Success: No libgcc"
+          '' + lib.strings.optionalString isLinux ''
+            ldd main|grep musl && echo "Success: Linked against Musl" || (echo "Error: Executable isn't link against Musl" && exit 1)
+          '' + lib.strings.optionalString true ''
+
             ./main
           '';
         };
