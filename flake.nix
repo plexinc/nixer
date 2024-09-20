@@ -41,6 +41,13 @@
             inherit flakeModules systems;
           };
 
-          perSystem = { pkgs, lib, ... }: { };
+          perSystem = { pkgs, lib, ... }: {
+            # Dogfooding our modules
+            nixer = {
+              name = "nixer";
+              src = ./.;
+              llvmVersion = "18";
+            };
+          };
         });
 }

@@ -27,7 +27,6 @@
           '' + lib.strings.optionalString isLinux ''
             ldd main|grep musl && echo "Success: Linked against Musl" || (echo "Error: Executable isn't link against Musl" && exit 1)
           '' + lib.strings.optionalString true ''
-
             ./main
           '';
         };

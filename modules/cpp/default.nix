@@ -14,12 +14,6 @@ self:
       stdenv = utils.mkLibcxxStdenv { inherit (config) llvmVersion; };
     in
     {
-      options.llvmVersion = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          What version of LLVM to use.
-        '';
-      };
       config = {
         packages.cppStdenv = stdenv;
 

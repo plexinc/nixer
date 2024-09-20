@@ -14,5 +14,5 @@ rec {
   # On Linux it will use musl as libc and on all the
   # platforms it uses llvm infrastructure.
   mkLibcxxStdenv = { llvmVersion }@params:
-    (targetPkgs params).stdenv.overrideCC pkgs."clang_${llvmVersion}";
+    (targetPkgs params).stdenv;
 }
