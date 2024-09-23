@@ -66,7 +66,8 @@ in
               description = "Common nixer configuration options";
             };
           };
-          config = {
+          #
+          config = lib.mkDefault {
             _module.args.pkgs = import localFlake.inputs.nixpkgs {
               inherit system;
               overlays = [
@@ -87,6 +88,8 @@ in
     };
   };
   cpp = localFlake.importApply ./cpp self';
+  python = localFlake.importApply ./python self';
+
   # treefmt = localFlake.importApply ./common/treefmt.nix self';
   # githooks = localFlake.importApply ./common/githooks.nix self';
 }

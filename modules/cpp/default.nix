@@ -1,6 +1,6 @@
 self:
 {
-  imports = [ self.default ];
+  imports = [ self.default self.python ];
 
 
   perSystem = { lib, config, pkgs, self', inputs', system, ... }:
@@ -14,26 +14,27 @@ self:
       stdenv = utils.mkLibcxxStdenv { inherit (config) llvmVersion; };
     in
     {
-      config = {
-        packages.cppStdenv = stdenv;
 
-        devShells = {
-          # Then reason we do an override on the default pkgs.mkShell
-          # instead of using targetPkgs.mkShell, is to avoid un-necessary
-          # builds. `pkgs` is glibc based on linux. By using it. We will
-          # use packages that run on glibc for the dev environment such
-          # as cmake or ninja that don't interact with our development
-          # via libc. This way we can hit the public cache and be much
-          # faster.
-          cpp = (pkgs.mkShell.override { inherit stdenv; }) {
-            nativeBuildInputs = [
-              pkgs.cmake
-              pkgs.ninja
-            ];
+      packages.cppStdenv = stdenv;
 
-            buildInputs = [
-            ];
-          };
+      devShells = {
+        # Then reason we do an override on the default pkgs.mkShell
+        # instead of using targetPkgs.mkShell, is to avoid un-necessary
+        # builds. `pkgs` is glibc based on linux. By using it. We will
+        # use packages that run on glibc for the dev environment such
+        # as cmake or ninja that don't interact with our development
+        # via libc. This way we can hit the public cache and be much
+        # faster.
+        cpp = (pkgs.mkShell.override { inherit stdenv; }) {
+          nativeBuildInputs = [
+            self'.packages.python38
+            pkgs.cmake
+            pkgs.ninja
+          ];
+
+          buildInputs = [
+          ];
+
         };
       };
     };
