@@ -6,7 +6,8 @@ set -xe
 pushd "$1"
 nix="$2"
 
+system=$($nix eval --impure --expr 'builtins.currentSystem')
 $nix flake check -L --show-trace
-$nix build ".#devShells.x86_64-linux.cpp" --show-trace
+$nix build ".#devShells.$system.cpp" --show-trace
 $nix copy --all --to 's3://cache.plex.bz?compression=zstd&compression-level=15&secret-key=cache.key'
 popd
