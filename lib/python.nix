@@ -27,11 +27,11 @@
         dontUseSetuptoolsCheck = true;
       } // params);
 
-  overrideViaPypi = pkg: { version, sha256, pname ? pkg.pname }: pkg.overrideAttrs (old: {
+  overrideViaPypi = pkg: { version, sha256, pname ? pkg.pname, ... }@params: pkg.overridePythonAttrs (old: {
     inherit version;
     src = fetchPypi {
       inherit pname;
       inherit version sha256;
     };
-  });
+  } // params);
 }

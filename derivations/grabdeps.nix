@@ -1,4 +1,4 @@
-{ buildPythonApplication
+{ buildPythonPackage
 , writeScript
 , plex-conan
 , setuptools
@@ -32,7 +32,7 @@ let
 
   '';
 in
-buildPythonApplication rec{
+buildPythonPackage rec{
   name = "grabdeps";
   version = "9.0.0";
   VERSION = version;

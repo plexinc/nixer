@@ -4,7 +4,7 @@ self:
   perSystem = { pkgs, lib, system, ... }:
     let
       plexOverlay = import ../../overlays { inherit (self) inputs; };
-      pkgs' = (import self.inputs.nixpkgs {
+      pkgs' = (import self.inputs.nixpkgs-conan {
         inherit system;
         overlays = [ plexOverlay ];
       });
@@ -20,7 +20,8 @@ self:
       config = {
         devShells.python = pkgs.mkShell (
           {
-            nativeBuildInputs = [
+            name = "python-shell";
+            packages = [
               py
             ];
           }

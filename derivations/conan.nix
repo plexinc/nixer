@@ -1,4 +1,6 @@
-{ fetchurl
+{ lib
+, stdenv
+, fetchurl
 , jinja2
 , buildPythonPackage
 , pyjwt
@@ -43,7 +45,6 @@ buildPythonPackage rec{
     bottle
     colorama
     deprecation
-    distro
     fasteners
     future
     node-semver
@@ -55,6 +56,8 @@ buildPythonPackage rec{
     six
     tqdm
     urllib3
+  ] ++ lib.optional stdenv.hostPlatform.isLinux [
+    distro
   ];
 
   nativeBuildInputs = [

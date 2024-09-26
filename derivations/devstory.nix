@@ -1,4 +1,4 @@
-{ buildPythonApplication
+{ buildPythonPackage
 , click
 , colorama
 , yaspin
@@ -13,11 +13,11 @@
 , setuptools
 , importlib-metadata
 }:
-buildPythonApplication rec{
+buildPythonPackage rec{
   name = "devstory";
   version = "10.0.0";
 
-  env.VERSION = version;
+  VERSION = version;
 
   src = ../tools/devstory;
 

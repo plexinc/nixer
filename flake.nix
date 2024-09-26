@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-conan.url = "github:NixOS/nixpkgs/e912fb83d2155a393e7146da98cda0e455a80fb6";
+    nixpkgs-conan.url = "github:NixOS/nixpkgs/nixos-23.05"; #e912fb83d2155a393e7146da98cda0e455a80fb6";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixdoc.url = "github:nix-community/nixdoc";
   };

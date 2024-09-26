@@ -8,8 +8,10 @@ let
   packageOverrides = pfinal: pprev: (with pylib;
     rec {
       distro = overrideViaPypi pprev.distro {
+        pname = "distro";
         version = "1.1.0";
         sha256 = "722054925f339a39ca411a8c7079f390a41d42c422697bedf228f1a9c46ac1ee";
+        doCheck = false;
       };
       deprecation = overrideViaPypi pprev.deprecation {
         version = "2.0.7";
@@ -65,20 +67,24 @@ let
         ];
       };
 
-      plex-conan = pprev.callPackage ../derivations/conan.nix { };
-      grabdeps = pprev.callPackage ../derivations/grabdeps.nix { };
-      beard = pprev.callPackage ../derivations/beard.nix { };
-      devstory = pprev.callPackage ../derivations/devstory.nix {
+      plex-conan = pfinal.callPackage ../derivations/conan.nix { };
+      grabdeps = pfinal.callPackage ../derivations/grabdeps.nix { };
+      beard = pfinal.callPackage ../derivations/beard.nix { };
+      devstory = pfinal.callPackage ../derivations/devstory.nix {
         inherit (pfinal) grabdeps beard;
-
       };
     });
 
-  python37 = conanSet.python37.override { inherit packageOverrides; self = python37; };
-  python38 = conanSet.python38.override { inherit packageOverrides; self = python38; };
+  #python37 = (conanSet.python37.override { inherit packageOverrides; self = python37; }).overrideAttrs (old: { pname = "python37"; version = "3.7.10"; });
+  python38 = conanSet.python38.override (super:
+    {
+      inherit packageOverrides;
+      self = python38;
+    });
 in
 {
   inherit (fetchers) plexFetchFromGitHub;
   inherit (pylib) buildPythonPackage overrideViaPypi;
-  inherit python37 python38;
+  #inherit python37 python38;
+  inherit python38;
 }
