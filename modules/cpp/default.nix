@@ -1,13 +1,15 @@
 self:
 {
-  imports = [ self.default self.python ];
-
+  imports = [
+    self.default
+    self.python
+  ];
 
   perSystem = { lib, config, pkgs, self', inputs', system, ... }:
     let
       utils = pkgs.callPackage ./lib.nix { };
 
-      targetPkgs = utils.targetPkgs { inherit (config) llvmVersion; };
+      # targetPkgs = utils.targetPkgs { inherit (config) llvmVersion; };
 
       # while we can do targetPkgs.stdenv here, its better to call
       # a function to future proof it.

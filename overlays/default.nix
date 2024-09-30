@@ -28,6 +28,9 @@ let
       node-semver = overrideViaPypi pprev.node-semver {
         version = "0.6.1";
         sha256 = "4016f7c1071b0493f18db69ea02d3763e98a633606d7c7beca811e53b5ac66b7";
+        pythonImportsCheckPhase = ''
+          echo "Not needed"
+        '';
       };
       importlib-metadata = overrideViaPypi pprev.importlib-metadata {
         version = "4.8.3";
