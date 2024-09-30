@@ -1,0 +1,31 @@
+name: Update InfraDocs
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '**.md'
+
+jobs:
+  update-docs:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4.1.7
+        with:
+          repository: plexinc/infra-docs
+          submodules: true
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Update submodule
+        run: |
+          git submodule update --recursive --remote
+
+      - name: Commit & Push
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add --all
+          git commit -m "Update ${{github.repository }} submodule" || echo "No changes to commit"
+          git push
+
