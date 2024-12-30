@@ -77,14 +77,17 @@ with lib;
         default = _: { };
       };
 
-      # generic = mkOption {
-      #   type = types.attrsOf
-      # };
+      generic = mkOption {
+        type = types.lazyAttrsOf types.unspecified;
+        description = "Any system agnostic configuration to be merged with the output";
+        example = lib.literalExpression or lib.literalExample ''
+          generic = {
+            foo = bar;
+          };
+        '';
+      };
     };
   config =
-    let
-      perSystemObject = config.perSystem;
-    in
     {
       #_module.args. = pkgs;
       # We want modules to define arbitrary attributes and don't restrict

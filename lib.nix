@@ -15,6 +15,5 @@
         };
       };
     in
-    final.config.perSystem;
-
+    final.config.perSystem // final.config.generic;
 }
