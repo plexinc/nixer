@@ -21,13 +21,15 @@ with lib;
 
             reducer = fn: system: acc:
               let
-                obj = acc.extend (final: prev: fn {
-                  inherit final prev system;
-                  pkgs = import nixpkgs {
-                    inherit system;
-                    inherit (config) overlays;
-                  };
-                });
+                obj = acc.extend (final: prev:
+                  # This is the actual call to `perSystem` functions
+                  fn {
+                    inherit final prev system;
+                    pkgs = import nixpkgs {
+                      inherit system;
+                      inherit (config) overlays;
+                    };
+                  });
               in
               foldr (replaceAttrs system) obj config.attributes;
             callFn = fn: accObj: foldr (reducer fn) accObj systems;

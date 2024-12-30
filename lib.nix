@@ -1,6 +1,6 @@
 { nixpkgs-lib }:
 {
-  mkFlake = { inputs, nixpkgs, ... }: { systems, imports ? [ ] }:
+  mkFlake = { inputs, nixpkgs, ... }: { systems, imports ? [ ], specialArgs ? { } }:
     let
       lib = nixpkgs-lib.lib;
       final = lib.evalModules {
@@ -12,7 +12,7 @@
 
         specialArgs = {
           inherit nixpkgs systems;
-        };
+        } // specialArgs;
       };
     in
     final.config.perSystem // final.config.generic;
