@@ -80,13 +80,14 @@ with lib;
       };
 
       generic = mkOption {
-        type = types.lazyAttrsOf types.unspecified;
+        type = types.attrsOf types.unspecified;
         description = "Any system agnostic configuration to be merged with the output";
         example = lib.literalExpression or lib.literalExample ''
           generic = {
             foo = bar;
           };
         '';
+        default = { };
       };
     };
   config =
