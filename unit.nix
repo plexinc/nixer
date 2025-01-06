@@ -3,38 +3,53 @@ with lib;
 {
   options =
     let
+      update = lib.attrsets.recursiveUpdate;
       perSystemType = mkOptionType {
         name = "perSystemType";
         description = "A function that receives per system arguments and generate flake outputs attrs";
         descriptionClass = "composite";
         check = isFunction;
-        merge = (locs: fileValues:
+        merge = locs: fileValues: lib.fixedPoints.fix (self:
           let
-            perSystemObj = lib.fixedPoints.makeExtensible (final: { });
             fns = map (x: x.value) fileValues;
+            vv = s:
+              if builtins.hasAttr "devShells" s
+              then s.devShells
+              else
+                { };
             replaceAttrs = system: attr: obj: (with builtins;
-              if hasAttr attr obj
+              if hasAttr
+                attr
+                obj
               # Rewrite the attr with system
               then
-                removeAttrs obj [ attr ] // { ${attr}.${system} = obj.${attr}; }
+                update (removeAttrs obj [ attr ])
+                  {
+                    ${attr}.${system} = obj.${attr};
+                  }
               else obj);
 
-            reducer = fn: system: acc:
+            reducer = fn: system: state:
               let
-                obj = acc.extend (final: prev:
-                  # This is the actual call to `perSystem` functions
-                  fn {
-                    inherit final prev system;
-                    pkgs = import nixpkgs {
-                      inherit system;
-                      inherit (config) overlays;
-                    };
-                  });
+                obj = update state
+                  (fn
+                    {
+                      inherit self system;
+                      pkgs = import nixpkgs {
+                        inherit system;
+                        inherit (config) overlays;
+                      };
+                    });
               in
-              foldr (replaceAttrs system) obj config.attributes;
-            callFn = fn: accObj: foldr (reducer fn) accObj systems;
+              obj;
+            callFn = fn: state: foldr (reducer fn) state systems;
+            orignalMap = foldr callFn { } fns;
+            systemReplacer = system: state: update state (foldr
+              (replaceAttrs system)
+              orignalMap
+              config.attributes);
           in
-          foldr callFn perSystemObj fns);
+          foldr systemReplacer { } systems);
       };
     in
     {
@@ -71,6 +86,7 @@ with lib;
           "packages"
           "apps"
           "devShells"
+          "checks"
         ];
       };
       perSystem = mkOption {

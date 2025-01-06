@@ -15,5 +15,5 @@
         } // specialArgs;
       };
     in
-    final.config.perSystem // final.config.generic;
+    lib.attrsets.recursiveUpdate final.config.perSystem final.config.generic;
 }
