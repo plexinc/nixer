@@ -1,6 +1,6 @@
--- SPDX-FileCopyrightText: 2025 Plex Inc <info@plex.tv>
---
--- SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2025 Plex Inc <info@plex.tv>
+#
+# SPDX-License-Identifier: MIT
 
 { nixpkgs-lib }:
 {
