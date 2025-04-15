@@ -8,6 +8,17 @@ with lib;
   options =
     let
       update = lib.attrsets.recursiveUpdate;
+      # The whole point of this type is to first:
+      # verify the `perSystem` function and second,
+      # Create a package set for each provided system
+      # and call the `perSystem` function with that pkgs
+      # and finally merged them together to form the output.
+      # This type rewrites some of the attributes that are
+      # provided via `attributes` module option, with
+      # respect to the `buildPlatform.system`.
+      # For example: `packages.default` will be rewritten to
+      # `packages.${system}.default`. Here, system refers to the
+      # buildPlatform's system.
       perSystemType = mkOptionType {
         name = "perSystemType";
         description = "A function that receives per system arguments and generate flake outputs attrs";
@@ -15,12 +26,12 @@ with lib;
         check = isFunction;
         merge = locs: fileValues: lib.fixedPoints.fix (self:
           let
+            makePkgsFor = system:
+              import nixpkgs ({
+                inherit (config) overlays;
+              } // system);
+
             fns = map (x: x.value) fileValues;
-            vv = s:
-              if builtins.hasAttr "devShells" s
-              then s.devShells
-              else
-                { };
             replaceAttrs = system: attr: obj: (with builtins;
               if hasAttr
                 attr
@@ -33,25 +44,21 @@ with lib;
                   }
               else obj);
 
-            reducer = fn: system: state:
+            reducer = pkgs: fn: system: state: update state (fn {
+              inherit self pkgs;
+              system = pkgs.buildPlatform.system;
+            });
+
+            callFn = pkgs: fn: state: foldr (reducer pkgs fn) state systems;
+            orignalMap = pkgs: foldr (callFn pkgs) { } fns;
+            systemReplacer = system: state:
               let
-                obj = update state
-                  (fn
-                    {
-                      inherit self system;
-                      pkgs = import nixpkgs {
-                        inherit system;
-                        inherit (config) overlays;
-                      };
-                    });
+                pkgs = makePkgsFor system;
               in
-              obj;
-            callFn = fn: state: foldr (reducer fn) state systems;
-            orignalMap = foldr callFn { } fns;
-            systemReplacer = system: state: update state (foldr
-              (replaceAttrs system)
-              orignalMap
-              config.attributes);
+              update state (foldr
+                (replaceAttrs pkgs.hostPlatform.system)
+                (orignalMap pkgs)
+                config.attributes);
           in
           foldr systemReplacer { } systems);
       };
@@ -63,19 +70,29 @@ with lib;
         default = { };
       };
 
-      overlays = mkOption {
-        type = types.listOf (types.functionTo
-          (types.functionTo (types.lazyAttrsOf types.unspecified)));
 
-        description = "Overlays to use with nixpkgs";
-        example = lib.literalExpression or lib.literalExample ''
-          overlays = [(final: prev: {
-              foo = prev....;
-            };
-          )];
-        '';
-        default = [ (final: prev: { }) ];
-      };
+      overlays =
+        let
+          singleOverlayType = types.functionTo (types.functionTo (types.lazyAttrsOf types.unspecified));
+          listOfOverlays = types.listOf singleOverlayType;
+        in
+
+        mkOption {
+          type = listOfOverlays;
+
+          description = ''Overlays to use with nixpkgs. It's a list of overlay
+            functions to apply to **ALL** the package sets. Thus the module
+            author should make the overlay build/host/target Platform aware.
+          '';
+
+          example = lib.literalExpression or lib.literalExample ''
+            overlays = [(final: prev: {
+                foo = prev....;
+              };
+            )];
+          '';
+          default = { };
+        };
 
       nixPkgsConfig = mkOption {
         type = types.lazyAttrsOf types.unspecified;
@@ -93,12 +110,22 @@ with lib;
           "checks"
         ];
       };
+
       perSystem = mkOption {
         type = perSystemType;
         description = "Per system flake configuration.";
         default = _: { };
       };
 
+      helpers = mkOption {
+        type = types.attrsOf types.unspecified;
+        description = ''
+          An attrset of helper functions or data structures that
+          modules can use to expose to user
+        '';
+
+        default = { };
+      };
       generic = mkOption {
         type = types.attrsOf types.unspecified;
         description = "Any system agnostic configuration to be merged with the output";
@@ -112,9 +139,6 @@ with lib;
     };
   config =
     {
-      #_module.args. = pkgs;
-      # We want modules to define arbitrary attributes and don't restrict
-      # them for now
       _module.check = false;
     };
 }
