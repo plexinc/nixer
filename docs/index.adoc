@@ -1,0 +1,206 @@
+= Nixer
+:toc:
+:icons: font
+
+image:https://img.shields.io/badge/License-MIT-yellow.svg[License: MIT, link=https://opensource.org/licenses/MIT]
+
+== What is Nixer?
+
+Nixer is a simpler alternative to https://github.com/numtide/flake-utils[flake-utils] and https://flake.parts/[flake-parts].
+It helps you break down your flake file into separate nix modules (that we all love :D). Unlike flake-parts and flake-utils,
+in Nixer, you can decide how to build a package set for your +perSystem+ logic. Thus, Nixer helps you to handle cross compilation
+much easier.
+
+== How Nixer Works
+
+Nixer uses the Nix module system to organize your flake. Here's what it does:
+
+1. Takes the modules you provide
+2. Creates package sets for each system in your `systems` list
+3. Runs your `perSystem` function for each system
+4. Automatically handles system-specific paths
+5. Combines system-specific outputs with general outputs
+
+Simple, eh?
+
+== How to Use Nixer
+You can use Nixer like any other flake file. The most important part of Nixer is the +mkFlake+ function.
+Let's see a super simple example first:
+
+[source,nix]
+----
+{
+  description = "My project using nixer";
+
+  inputs = {
+    nixer.url = "github:plex/nixer"; <1>
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  };
+
+  outputs = inputs@{ self, nixer, nixpkgs, ... }:
+    nixer.mkFlake { inherit inputs nixpkgs; } { <2>
+      systems = [  <3>
+        { system = "x86_64-linux" }
+        { system = "aarch64-darwin" }
+      ];
+
+      # System dependent logic
+      perSystem = { pkgs, system, ... }: { <4>
+        packages.default = pkgs.hello; <5>
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ pkgs.hello ];
+        };
+      };
+
+      # System agnostic logic. Like `flake` in flake-parts
+      generic = { <6>
+        nixosModules.default = { config, ... }: {
+          # Your NixOS module here
+        };
+      };
+    };
+}
+----
+<1> Using the main branch of Nixer as an input
+<2> `mkFlake` function takes two arguments of type `attrset`.
+<3> `systems` key describes all the system configurations that are needed for this flake. More on this later.
+<4> Like +flake-parts+, `perSystem` function executes for every system that is provided via `systems` key.
+<5> Nixer will take care of system dependent outputs for you. Here, `packages.default` will get rewritten to `packages.${pkgs.buildPlatform.system}.default`.
+<6> Your system agnostic code goes in the `generic` key. And you can just treat it as any other flake output.
+
+=== `mkFlake` function
+As mentioned above, `mkFlake` function takes two arguments of type +attrset+, and returns an +attrset+ (the `output` attrset in fact).
+
+The first parameter to this function is an attrset with the following keys:
+
+* `inputs`: Inputs to the flake file. Nixer will pass the inputs as `specialArgs` to all the modules.
+* `nixpkgs`: Then `nixpkgs` input to be used to create packagesets. Nixer will pass the inputs as `specialArgs` to all the modules. In a flake file with multiple `nixpkgs` as inputs
+  you can decide which one can be the default.
+
+The second parameter in an attrset with the following keys:
+
+* `imports`: A list of modules to used with Nixer. Here is an exampel:
+
+[source,nix]
+  ...
+  imports = [
+    ./foo
+    inputs.bar.modules.baz
+    ({lib, pkgs, ...}: {....})
+  ];
+  ...
+---
+
+* `systems`: A list of systems to support for this flake file.
+  Each of the elements a system has to be an attrset which Nixer will
+  directly pass them to `nixpkgs` when creating a package set for
+  that system. Here is a more detailed example:
+[source,nix]
+  ...
+  systems = [
+    { <1>
+      system = "x86_64-linux";
+      crossSystem = "x86_64-unknown-linux-musl";
+    }
+    { <2>
+      localSystem = {
+        config = "x86_64-linux";
+      };
+      crossSystem = {
+        config = "x86_64-unknown-linux-musl";
+        useLLVM = true;
+      };
+    }
+    { <3>
+      crossSystem = lib.systems.examples.raspberryPi; <4>
+    }
+  ];
+  ...
+---
+<1> The first system describes a system that cross compile to the same arch but different libc.
+<2> Same as <1>, but uses LLVM ecosystem instead of GNU.
+<3> A system that cross compiles to raspberryPi;
+<4> For more information on what you can use with nixpkgs, have a look at https://github.com/NixOS/nixpkgs/blob/master/lib/systems/examples.nix.
+
+* `specialArgs`: An optional key that is an attrset with what ever value that you want
+  to pass to all your modules.
+
+=== Writing modules
+
+Since Nixer uses NixOS's module system, writting a Nixer module is pretty straight forward.
+There are a few examples in the https://github.com/plexinc/nixer/tree/master/examples[examples] directory.
+
+Make sure to read the chapter on Nix modules on the https://nixos.org/manual/nixos/stable/#sec-writing-modules[official manual],
+and also https://nixos.wiki/wiki/NixOS_modules[the wiki page].
+
+Just bear in mind that, while NixOS modules and Nixer modules are using the same module infrastructure, they are not compatible with each other. Technically you can use a NixOS module with Nixer and the other way around. But it would be pointless as they are designed for different purposes.
+
+=== Hello Nixer module
+Let's write a simple module as an example. A module that exposes the `hello` package to the world.
+
+[source,nix]
+----
+{ lib <1>
+, config
+, ...
+}:
+with lib;
+{
+  imports = [
+    ./foo.nix <2>
+  ];
+
+  options = {
+    nixer.hello = { <3>
+      who = mkOption { <4>
+        type = types.str;
+        default = "Nixer";
+        description = ''
+          Who to greet
+        '';
+      };
+    };
+  };
+
+  config = {
+    perSystem = { self, pkgs, system, ... }: <5>
+      let
+        greeting = pkgs.writeScript "my-hello" '' <6>
+          #! ${pkgs.stdenv.shell}
+          ${pkgs.hello}/bin/hello -g 'Hello ${config.nixer.hello.who}'
+        '';
+      in
+      {
+        packages.default = pkgs.hello;
+        packages.my-hello = greeting; <7>
+
+        apps.default = {
+          type = "app";
+          program = "${greeting}";
+        };
+      };
+  };
+}
+----
+<1> As you already know by reading the NixOS's module guide, each module
+    will be called by a set of certain attributes like: `lib`, `options`, `config` and
+    so on.
+<2> Modules can import other modules.
+<3> In the options section we're adding a new nested attrset for the options of this module
+<4> We're defining a string option that is not mergable. For more information read the module
+    guide of NixOS
+<5> We're using the `perSystem` function to populate the attributes of the final flake
+<6> We wrap the `hello` package and use the value of the option that we defined in the step <4>
+    via `config` and the nested attrset that we defined in the options section. As you already
+    know, any other module can set the value for that function and we will get the finalized
+    value via the `config` attrset.
+<7> Exposing our `hello` wrapper for the flake file. Notice that we didn't specify what system this
+    package is for. That's the point of `perSystem` it will automatically rewrite `packages.my-hello` to
+    `packages.${system}.my-hello` based on the systems description from the `mkFlake` function call.
+
+= Unit Options
+include::options.adoc[]
+
+= License
+MIT © 2025 Plex Inc.

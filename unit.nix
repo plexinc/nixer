@@ -91,14 +91,8 @@ with lib;
               };
             )];
           '';
-          default = { };
+          default = [ ];
         };
-
-      nixPkgsConfig = mkOption {
-        type = types.lazyAttrsOf types.unspecified;
-        description = "An attrset to be passed to nixpkgs as config.";
-        default = { };
-      };
 
       attributes = mkOption {
         type = types.listOf (types.str);

@@ -6,8 +6,7 @@
 {
   mkFlake = { inputs, nixpkgs, ... }: { systems, imports ? [ ], specialArgs ? { } }:
     let
-      lib = nixpkgs-lib.lib;
-      final = lib.evalModules {
+      final = nixpkgs-lib.evalModules {
         # The unit module is mandatory and the bare min
         # config that is necessary
         modules = [
@@ -19,5 +18,26 @@
         } // specialArgs;
       };
     in
-    lib.attrsets.recursiveUpdate final.config.perSystem final.config.generic;
+    nixpkgs-lib.attrsets.recursiveUpdate final.config.perSystem final.config.generic;
+
+  docs = { lib, runCommand, asciidoctor-with-extensions, nixosOptionsDoc, ... }:
+    let
+      final = lib.evalModules {
+        modules = [
+          ./unit.nix
+        ];
+
+        specialArgs = { };
+      };
+      adocs = (nixosOptionsDoc {
+        inherit (final) options;
+      }).optionsAsciiDoc;
+    in
+    runCommand "gen-html" { } ''
+      mkdir -p $out
+      cp -v ${adocs} $out/options.adoc
+      cp -v ${./docs/index.adoc} $out/index.adoc
+      ls -l $out
+      ${asciidoctor-with-extensions}/bin/asciidoctor -a linkcss -a copycss $out/index.adoc -o $out/index.html
+    '';
 }
