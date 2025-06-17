@@ -14,8 +14,10 @@
     nixer.mkFlake { inherit inputs nixpkgs; }
       {
         systems = [
-          (withSystem "x86_64-linux")
-          (withSystem "aarch64-darwin")
+          {
+            system = "x86_64-linux";
+            crossSystem = lib.systems.examples.raspberryPi;
+          }
         ];
 
         imports = [

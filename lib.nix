@@ -4,7 +4,7 @@
 
 { nixpkgs-lib }:
 {
-  mkFlake = { inputs, nixpkgs, ... }: { systems, imports ? [ ], specialArgs ? { } }:
+  mkFlake = { inputs, nixpkgs, ... }: { systems, imports ? [ ], specialArgs ? { }, ... }:
     let
       final = nixpkgs-lib.evalModules {
         # The unit module is mandatory and the bare min

@@ -26,10 +26,11 @@ with lib;
           #! ${pkgs.stdenv.shell}
           ${pkgs.hello}/bin/hello -g 'Hello ${config.nixer.hello.who}'
         '';
+        my-hello = builtins.trace "my-hello-${pkgs.stdenv.hostPlatform.libc}" "my-hello-${pkgs.stdenv.hostPlatform.libc}";
       in
       {
         packages.default = pkgs.hello;
-        packages.my-hello = greeting;
+        packages.${my-hello} = greeting;
 
         apps.default = {
           type = "app";
